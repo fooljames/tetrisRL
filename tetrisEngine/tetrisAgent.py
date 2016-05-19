@@ -2,7 +2,7 @@ from pygame.constants import *
 import random
 
 class TetrisAgent:
-    possible_actions = [K_LEFT, K_RIGHT, K_UP, K_DOWN]
+    possible_actions = [K_LEFT, K_RIGHT, K_UP, K_DOWN, 0]
 
     # main method to be put in RLinterface
     def tetrisAgent(self, state, reward=None):

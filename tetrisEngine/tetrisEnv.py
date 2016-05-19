@@ -8,6 +8,7 @@ from pygame.locals import *
 from tetrisConfig import *
 import pygame.surfarray
 
+
 # to adjust board configuration (size for example) please go to the tetrisConfig file
 class TetrisEnv:
     def __init__(self):
@@ -96,21 +97,21 @@ class TetrisEnv:
                     break
                 self.fallingPiece['y'] += i - 1
 
-        # let the piece fall if it is time to fall
-        if time.time() - self.lastFallTime > self.fallFreq:
+            # let the piece fall if it is time to fall
+        # if time.time() - self.lastFallTime > self.fallFreq:
             # see if the piece has landed
-            if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
-                # falling piece has landed, set it on the board
-                self.addToBoard(self.board, self.fallingPiece)
-                self.score += self.removeCompleteLines(self.board)
-                # getting reward
-                reward += self.removeCompleteLines(self.board)
-                self.level, self.fallFreq = self.calculateLevelAndFallFreq(self.score)
-                self.fallingPiece = None
-            else:
-                # piece did not land, just move the piece down
-                self.fallingPiece['y'] += 1
-                self.lastFallTime = time.time()
+        if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
+            # falling piece has landed, set it on the board
+            self.addToBoard()
+            self.score += self.removeCompleteLines(self.board)
+            # getting reward
+            reward += self.removeCompleteLines(self.board)
+            self.level, self.fallFreq = self.calculateLevelAndFallFreq(self.score)
+            self.fallingPiece = None
+        else:
+            # piece did not land, just move the piece down
+            self.fallingPiece['y'] += 1
+            self.lastFallTime = time.time()
 
         # drawing everything on the screen
         self.DISPLAYSURF.fill(BGCOLOR)
@@ -123,7 +124,7 @@ class TetrisEnv:
         # update the display
         pygame.display.update()
         # adjust FPS
-        self.FPSCLOCK.tick(FPS)
+        # self.FPSCLOCK.tick(FPS)
         return self.board, reward
 
     def makeTextObjs(self, text, font, color):
@@ -192,12 +193,12 @@ class TetrisEnv:
                     'color': random.randint(0, len(COLORS) - 1)}
         return newPiece
 
-    def addToBoard(self, board, piece):
+    def addToBoard(self):
         # fill in the board based on piece's location, shape, and rotation
         for x in range(TEMPLATEWIDTH):
             for y in range(TEMPLATEHEIGHT):
-                if PIECES[piece['shape']][piece['rotation']][y][x] != BLANK:
-                    board[x + piece['x']][y + piece['y']] = piece['color']
+                if PIECES[self.fallingPiece['shape']][self.fallingPiece['rotation']][y][x] != BLANK:
+                    self.board[x + self.fallingPiece['x']][y + self.fallingPiece['y']] = self.fallingPiece['color']
 
     def getBlankBoard(self):
         # create and return a new blank board data structure
