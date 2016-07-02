@@ -42,7 +42,7 @@ class TetrisEnv:
     def initialize(self):
         self.__init__()
 
-        return self.board
+        return pygame.surfarray.array3d(pygame.display.get_surface())
 
     # update state according to a given action and return 'terminal' if it can't fit a new piece on the board
     def update_state(self, action):
