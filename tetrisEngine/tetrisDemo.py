@@ -10,9 +10,8 @@ def main():
     agent = TetrisAgent()
     rli = RLinterface(agent.tetrisAgent, env.tetris_env)
     # run two episodes of tetris and print state, action, reward for every step
-    episode = rli.episodes(1)
-    print episode[2]
-    print episode[3].shape
+    episode = rli.steps(1)
+    print episode
 
 
 if __name__ == '__main__':

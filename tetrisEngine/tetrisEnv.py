@@ -41,6 +41,12 @@ class TetrisEnv:
     # initialize first state (blank board)
     def initialize(self):
         self.__init__()
+        # drawing everything on the screen
+        self.DISPLAYSURF.fill(BGCOLOR)
+        self.drawBoard(self.board)
+
+        # update the display
+        pygame.display.update()
 
         return pygame.surfarray.array2d(pygame.display.get_surface())
 
