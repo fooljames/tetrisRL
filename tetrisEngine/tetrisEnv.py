@@ -125,7 +125,10 @@ class TetrisEnv:
         pygame.display.update()
         # adjust FPS
         # self.FPSCLOCK.tick(FPS)
-        return self.board, reward
+
+        image_data = pygame.surfarray.array3d(pygame.display.get_surface())
+
+        return image_data, reward
 
     def makeTextObjs(self, text, font, color):
         surf = font.render(text, True, color)
