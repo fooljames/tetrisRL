@@ -11,8 +11,20 @@ import pygame.surfarray
 
 # to adjust board configuration (size for example) please go to the tetrisConfig file
 class TetrisEnv:
-    def __init__(self):
+    def __init__(self, config):
+        global BOARDWIDTH, BOARDHEIGHT, FPS, WINDOWWIDTH, WINDOWHEIGHT, XMARGIN, TOPMARGIN
+
+        BOARDWIDTH = config['BOARDWIDTH']
+        BOARDHEIGHT = config['BOARDHEIGHT']
+        FPS = config['FPS']
+
+        WINDOWWIDTH = (BOARDWIDTH * BOXSIZE) + BOARDWIDTH * 10
+        WINDOWHEIGHT = (BOARDHEIGHT * BOXSIZE) + BOARDHEIGHT * 3
+        XMARGIN = int((WINDOWWIDTH - BOARDWIDTH * BOXSIZE) / 2)
+        TOPMARGIN = WINDOWHEIGHT - (BOARDHEIGHT * BOXSIZE) - 10
+
         pygame.init()
+        self.config = config
         self.FPSCLOCK = pygame.time.Clock()
         self.DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
         self.BASICFONT = pygame.font.Font('freesansbold.ttf', 18)
@@ -31,7 +43,7 @@ class TetrisEnv:
         self.game_over = False
 
     # main method to be put in RLinterface
-    def tetris_env(self, action=None):
+    def envFn(self, action=None):
         if action == None:
             return self.initialize()
         else:
@@ -40,7 +52,7 @@ class TetrisEnv:
 
     # initialize first state (blank board)
     def initialize(self):
-        self.__init__()
+        self.__init__(self.config)
         # drawing everything on the screen
         self.DISPLAYSURF.fill(BGCOLOR)
         self.drawBoard(self.board)
@@ -103,9 +115,9 @@ class TetrisEnv:
                     break
                 self.fallingPiece['y'] += i - 1
 
-            # let the piece fall if it is time to fall
-        # if time.time() - self.lastFallTime > self.fallFreq:
-            # see if the piece has landed
+                # let the piece fall if it is time to fall
+                # if time.time() - self.lastFallTime > self.fallFreq:
+                # see if the piece has landed
         if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
             # falling piece has landed, set it on the board
             self.addToBoard()
@@ -130,7 +142,7 @@ class TetrisEnv:
         # update the display
         pygame.display.update()
         # adjust FPS
-        # self.FPSCLOCK.tick(FPS)
+        self.FPSCLOCK.tick(FPS)
 
         image_data = pygame.surfarray.array2d(pygame.display.get_surface())
 
