@@ -55,14 +55,3 @@ class RandomAgent(TetrisAgent):
 
     def agentStartEpisode(self, state):
         super(RandomAgent, self).agentStartEpisode(state)
-
-
-class FeatureExtractor(object):
-    __metaclass__ = ABCMeta
-
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def extract(self, state):
-        pass
