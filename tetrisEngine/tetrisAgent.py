@@ -1,6 +1,9 @@
 from pygame.constants import *
 from abc import ABCMeta, abstractmethod
+from utils import util
+import featureExtractor
 import random
+
 
 class TetrisAgent(object):
     __metaclass__ = ABCMeta
@@ -18,7 +21,7 @@ class TetrisAgent(object):
 
     # method for learning
     @abstractmethod
-    def agentLearn(self, reward, state):
+    def agentLearn(self, reward, state, next_action):
         pass
 
     # initialize new val when start a new episode
@@ -29,15 +32,16 @@ class TetrisAgent(object):
     # main method to be put in RLinterface
     def agentFn(self, state, reward=None):
 
-        if reward != None:
-            self.agentLearn(reward, state)
-        else:
+        if reward == None:
             self.agentStartEpisode(state)
         if state != 'terminal':
-            action = self.agentChoose(state)
-            self.lastState, self.lastAction = state, action
+            next_action = self.agentChoose(state)
 
-            return action
+            self.agentLearn(reward, state, next_action)
+
+            self.lastState, self.lastAction = state, next_action
+
+            return next_action
         else:
             return None
 
@@ -50,8 +54,86 @@ class RandomAgent(TetrisAgent):
         # randomize an action to be played
         return random.choice(self.possible_actions)
 
-    def agentLearn(self, reward, state):
-        super(RandomAgent, self).agentLearn(reward, state)
+    def agentLearn(self, reward, state, next_action):
+        super(RandomAgent, self).agentLearn(reward, state, next_action)
 
     def agentStartEpisode(self, state):
         super(RandomAgent, self).agentStartEpisode(state)
+
+
+class ValueIterationAgent(TetrisAgent):
+    def __init__(self, config):
+        """
+        :param
+        config:
+        alpha    - learning rate
+        epsilon  - exploration rate
+        gamma    - discount factor
+        """
+        super(ValueIterationAgent, self).__init__()
+        self.epsilon = config['epsilon']
+        self.gamma = config['gamma']
+        self.alpha = config['alpha']
+
+    def getLegalActions(self, state):
+        return []
+
+    @abstractmethod
+    def getQValue(self, state, action):
+        pass
+
+    def getPolicy(self, state, legalActions):
+        possibleStateQValues = util.Counter()
+
+        for action in legalActions:
+            possibleStateQValues[action] = self.getQValue(state, action)
+
+        return possibleStateQValues.argMax()
+
+    def agentChoose(self, state):
+
+        legalActions = self.getLegalActions(state)
+        if (random.random() <= self.epsilon):
+            return random.choice(legalActions)
+        else:
+            return self.getPolicy(state, legalActions)
+
+
+class SarsaApproxAgent(ValueIterationAgent):
+    def __init__(self, config):
+        super(SarsaApproxAgent, self).__init__(config)
+        self.featExtractor = getattr(featureExtractor, config['featureExtractor'])
+        self.weights = util.Counter()
+
+    def getQValue(self, state, action):
+        qValue = 0.0
+        features = self.featExtractor.extract(state, action)
+        for key in features.keys():
+            qValue += (self.weights[key] * features[key])
+        return qValue
+
+    def agentLearn(self, reward, state, next_action):
+        features = self.featExtractor.extract(self.lastState, self.lastAction)
+        err = reward + self.gamma * self.getQValue(state, next_action) - self.getQValue(self.lastState, self.lastAction)
+
+        for key in features:
+            self.weights[key] += self.alpha * err * features[key]
+
+
+class QLearningApproxAgent(SarsaApproxAgent):
+    def __init__(self, config):
+        super(SarsaApproxAgent, self).__init__(config)
+
+    def getValue(self, state):
+        possibleStateQValues = util.Counter()
+        for action in self.getLegalActions(state):
+            possibleStateQValues[action] = self.getQValue(state, action)
+
+        return possibleStateQValues[possibleStateQValues.argMax()]
+
+    def agentLearn(self, reward, state, next_action):
+        features = self.featExtractor.extract(self.lastState, self.lastAction)
+        err = reward + self.gamma * self.getValue(state) - self.getQValue(self.lastState, self.lastAction)
+
+        for key in features:
+            self.weights[key] += self.alpha * err * features[key]
