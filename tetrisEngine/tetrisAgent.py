@@ -102,18 +102,19 @@ class ValueIterationAgent(TetrisAgent):
 class SarsaApproxAgent(ValueIterationAgent):
     def __init__(self, config):
         super(SarsaApproxAgent, self).__init__(config)
-        self.featExtractor = getattr(featureExtractor, config['featureExtractor'])
+        self.featureExtractor = getattr(featureExtractor, config['featureExtractor'])
         self.weights = util.Counter()
 
     def getQValue(self, state, action):
         qValue = 0.0
-        features = self.featExtractor.extract(state, action)
+        next_state = getNextState(state, action)
+        features = self.featureExtractor.extract(state, next_state)
         for key in features.keys():
             qValue += (self.weights[key] * features[key])
         return qValue
 
     def agentLearn(self, reward, state, next_action):
-        features = self.featExtractor.extract(self.lastState, self.lastAction)
+        features = self.featureExtractor.extract(self.lastState, state)
         err = reward + self.gamma * self.getQValue(state, next_action) - self.getQValue(self.lastState, self.lastAction)
 
         for key in features:
@@ -132,7 +133,7 @@ class QLearningApproxAgent(SarsaApproxAgent):
         return possibleStateQValues[possibleStateQValues.argMax()]
 
     def agentLearn(self, reward, state, next_action):
-        features = self.featExtractor.extract(self.lastState, self.lastAction)
+        features = self.featureExtractor.extract(self.lastState, state)
         err = reward + self.gamma * self.getValue(state) - self.getQValue(self.lastState, self.lastAction)
 
         for key in features:
