@@ -7,6 +7,7 @@ import random, time, pygame, sys
 from pygame.locals import *
 from tetrisConfig import *
 import pygame.surfarray
+import copy
 
 
 # to adjust board configuration (size for example) please go to the tetrisConfig file
@@ -60,7 +61,8 @@ class TetrisEnv:
         # update the display
         pygame.display.update()
 
-        return pygame.surfarray.array2d(pygame.display.get_surface())
+        # return pygame.surfarray.array2d(pygame.display.get_surface())
+        return self.board, self.fallingPiece
 
     # update state according to a given action and return 'terminal' if it can't fit a new piece on the board
     def update_state(self, action):
@@ -144,9 +146,26 @@ class TetrisEnv:
         # adjust FPS
         self.FPSCLOCK.tick(FPS)
 
-        image_data = pygame.surfarray.array2d(pygame.display.get_surface())
+        # image_data = pygame.surfarray.array2d(pygame.display.get_surface())
 
-        return image_data, reward
+        def fn(x):
+            y = copy.deepcopy(x)
+
+            for i in range(len(y)):
+                for j in range(len(y[0])):
+                    if (y[i][j] == '.'):
+                        y[i][j] = 0
+                    else:
+                        y[i][j] = 1
+            return y
+
+
+        binaryboard = fn(self.board)
+
+        # binaryboard = [fn(j) for j in [i for i in self.board]]
+
+        # return image_data, reward
+        return (binaryboard, self.fallingPiece), reward
 
     def makeTextObjs(self, text, font, color):
         surf = font.render(text, True, color)
