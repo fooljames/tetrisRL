@@ -8,11 +8,10 @@ import random
 class TetrisAgent(object):
     __metaclass__ = ABCMeta
 
-    possible_actions = [K_LEFT, K_RIGHT, K_UP, K_DOWN, 0]
-
-    def __init__(self):
+    def __init__(self, env):
         self.lastState = None
         self.lastAction = None
+        self.env = env
 
     # method for choosing an action
     @abstractmethod
@@ -47,12 +46,12 @@ class TetrisAgent(object):
 
 
 class RandomAgent(TetrisAgent):
-    def __init__(self):
-        super(RandomAgent, self).__init__()
+    def __init__(self, env):
+        super(RandomAgent, self).__init__(env)
 
     def agentChoose(self, state):
         # randomize an action to be played
-        return random.choice(self.possible_actions)
+        return random.choice(self.env.get_legal_actions(state))
 
     def agentLearn(self, reward, state, next_action):
         super(RandomAgent, self).agentLearn(reward, state, next_action)

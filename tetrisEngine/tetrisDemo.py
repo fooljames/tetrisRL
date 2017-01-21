@@ -11,14 +11,14 @@ def main():
     envconf = {
         'BOARDWIDTH': 10,
         'BOARDHEIGHT': 20,
-        'FPS': 100
+        'FPS': 10
         }
 
     env = TetrisEnv(envconf)
-    agent = RandomAgent()
+    agent = RandomAgent(env)
     rli = RLinterface(agent.agentFn, env.envFn)
     # run two episodes of tetris and print state, action, reward for every step
-    episode = rli.episodes(3)
+    episode = rli.episodes(1)
     print episode
 
 
