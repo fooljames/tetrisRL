@@ -77,7 +77,7 @@ class TetrisEnv:
         # return pygame.surfarray.array2d(pygame.display.get_surface())
         return binaryboard, self.fallingPiece
 
-    def get_legal_actions(self):
+    # def get_legal_actions(self):
 
 
     # update state according to a given action and return 'terminal' if it can't fit a new piece on the board
