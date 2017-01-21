@@ -51,6 +51,17 @@ class TetrisEnv:
             s, r = self.update_state(action)
             return s, r
 
+    def fn(self, board):
+        y = copy.deepcopy(board)
+
+        for i in range(len(y)):
+            for j in range(len(y[0])):
+                if (y[i][j] == '.'):
+                    y[i][j] = 0
+                else:
+                    y[i][j] = 1
+        return y
+
     # initialize first state (blank board)
     def initialize(self):
         self.__init__(self.config)
@@ -61,8 +72,13 @@ class TetrisEnv:
         # update the display
         pygame.display.update()
 
+        binaryboard = self.fn(self.board)
+
         # return pygame.surfarray.array2d(pygame.display.get_surface())
-        return self.board, self.fallingPiece
+        return binaryboard, self.fallingPiece
+
+    def get_legal_actions(self):
+
 
     # update state according to a given action and return 'terminal' if it can't fit a new piece on the board
     def update_state(self, action):
@@ -148,19 +164,7 @@ class TetrisEnv:
 
         # image_data = pygame.surfarray.array2d(pygame.display.get_surface())
 
-        def fn(x):
-            y = copy.deepcopy(x)
-
-            for i in range(len(y)):
-                for j in range(len(y[0])):
-                    if (y[i][j] == '.'):
-                        y[i][j] = 0
-                    else:
-                        y[i][j] = 1
-            return y
-
-
-        binaryboard = fn(self.board)
+        binaryboard = self.fn(self.board)
 
         # binaryboard = [fn(j) for j in [i for i in self.board]]
 
