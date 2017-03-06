@@ -34,11 +34,17 @@ class SimpleFeatureExtractor(FeatureExtractor):
 
         max_height = np.amax(col_height)
 
-        state = State(col_height, max_height, height_diff, holes)
+        features = {'col_height': col_height,
+                    'max_height': max_height,
+                    'height_diff': height_diff,
+                    'holes': holes}
 
-        state.updateTransition(previous)
 
-        return state
+        # state = State(col_height, max_height, height_diff, holes)
+
+        # state.updateTransition(previous)
+
+        return features
 
 
 def main():
@@ -47,6 +53,10 @@ def main():
                    (1, 1, 1, 1, 0), (1, 1, 1, 1, 0)])
     print x
     print "features: " + str(fe.extract(x, x))
+
+    features = fe.extract(x, x)
+    for key in features:
+        print 0.1* features[key] + 3
 
 if __name__ == '__main__':
     main()
