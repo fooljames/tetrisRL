@@ -276,11 +276,13 @@ class TetrisEnv:
 
         def to_k_left_right(num):
             if num >= 0:
-                temp1 = [K_RIGHT]*num
-                return temp1.append(K_SPACE)
+                temp = [K_RIGHT]*num
+                temp.append(K_SPACE)
+                return temp
             else:
-                temp2 = [K_LEFT]*num
-                return temp2.append(K_SPACE)
+                temp = [K_LEFT]*num
+                temp.append(K_SPACE)
+                return temp
 
         for xAdj in range(-BOARDWIDTH, BOARDWIDTH):
             if self.isValidPosition(self.board, self.fallingPiece, xAdj, 0):
@@ -291,7 +293,8 @@ class TetrisEnv:
 
         for spin in possibleSpin:
             for move in movesAndSpace:
-                result.append(spin.extend(move))
+                spin.extend(move)
+                result.append(spin)
 
         return result
 

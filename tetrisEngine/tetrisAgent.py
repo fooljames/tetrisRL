@@ -34,7 +34,7 @@ class TetrisAgent(object):
         if reward == None:
             self.agentStartEpisode(state)
         if state != 'terminal':
-            next_action = self.agentChoose(state)
+            next_action = self.agentChoose()
 
             self.agentLearn(reward, state, next_action)
 
