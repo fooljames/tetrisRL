@@ -86,17 +86,6 @@ class TetrisEnv:
         for action in actions:
 
             reward = 0
-            if self.fallingPiece == None:
-                # No falling piece in play, so start a new piece at the top
-                self.fallingPiece = self.nextPiece
-                self.nextPiece = self.getNewPiece()
-                self.lastFallTime = time.time()  # reset lastFallTime
-
-                if not self.isValidPosition(self.board, self.fallingPiece):
-                    self.game_over = True  # can't fit a new piece on the board, so game over
-                    return 'terminal', reward
-
-            self.checkForQuit()
             if (action == K_LEFT) and self.isValidPosition(self.board, self.fallingPiece,
                                                            adjX=-1):
                 self.fallingPiece['x'] -= 1
@@ -132,9 +121,9 @@ class TetrisEnv:
                 self.movingLeft = False
                 self.movingRight = False
                 for i in range(1, BOARDHEIGHT):
-                    if not self.isValidPosition(self.board, self.fallingPiece, adjY=i):
+                    if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
                         break
-                    self.fallingPiece['y'] += i - 1
+                    self.fallingPiece['y'] += 1
 
                     # let the piece fall if it is time to fall
                     # if time.time() - self.lastFallTime > self.fallFreq:
@@ -152,6 +141,16 @@ class TetrisEnv:
                 self.fallingPiece['y'] += 1
                 self.lastFallTime = time.time()
 
+            if self.fallingPiece == None:
+                # No falling piece in play, so start a new piece at the top
+                self.fallingPiece = self.nextPiece
+                self.nextPiece = self.getNewPiece()
+                self.lastFallTime = time.time()  # reset lastFallTime
+
+                if not self.isValidPosition(self.board, self.fallingPiece):
+                    self.game_over = True  # can't fit a new piece on the board, so game over
+                    return 'terminal', reward
+
             # drawing everything on the screen
             self.DISPLAYSURF.fill(BGCOLOR)
             self.drawBoard(self.board)
@@ -167,7 +166,11 @@ class TetrisEnv:
 
             # image_data = pygame.surfarray.array2d(pygame.display.get_surface())
 
-            binaryboard = self.fn(self.board)
+
+
+
+        self.checkForQuit()
+        binaryboard = self.fn(self.board)
 
             # binaryboard = [fn(j) for j in [i for i in self.board]]
 
@@ -280,7 +283,7 @@ class TetrisEnv:
                 temp.append(K_SPACE)
                 return temp
             else:
-                temp = [K_LEFT]*num
+                temp = [K_LEFT]*-num
                 temp.append(K_SPACE)
                 return temp
 
@@ -293,8 +296,10 @@ class TetrisEnv:
 
         for spin in possibleSpin:
             for move in movesAndSpace:
-                spin.extend(move)
-                result.append(spin)
+                empty = []
+                empty.extend(spin)
+                empty.extend(move)
+                result.append(empty)
 
         return result
 
