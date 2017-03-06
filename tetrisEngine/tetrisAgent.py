@@ -49,9 +49,9 @@ class RandomAgent(TetrisAgent):
     def __init__(self, env):
         super(RandomAgent, self).__init__(env)
 
-    def agentChoose(self, state):
+    def agentChoose(self):
         # randomize an action to be played
-        return random.choice(self.env.get_legal_actions(state))
+        return random.choice(self.env.get_legal_actions())
 
     def agentLearn(self, reward, state, next_action):
         super(RandomAgent, self).agentLearn(reward, state, next_action)

@@ -81,94 +81,97 @@ class TetrisEnv:
 
 
     # update state according to a given action and return 'terminal' if it can't fit a new piece on the board
-    def update_state(self, action):
-        reward = 0
-        if self.fallingPiece == None:
-            # No falling piece in play, so start a new piece at the top
-            self.fallingPiece = self.nextPiece
-            self.nextPiece = self.getNewPiece()
-            self.lastFallTime = time.time()  # reset lastFallTime
+    def update_state(self, actions):
 
-            if not self.isValidPosition(self.board, self.fallingPiece):
-                self.game_over = True  # can't fit a new piece on the board, so game over
-                return 'terminal', reward
+        for action in actions:
 
-        self.checkForQuit()
-        if (action == K_LEFT) and self.isValidPosition(self.board, self.fallingPiece,
-                                                       adjX=-1):
-            self.fallingPiece['x'] -= 1
-            self.movingLeft = True
-            self.movingRight = False
-            self.lastMoveSidewaysTime = time.time()
+            reward = 0
+            if self.fallingPiece == None:
+                # No falling piece in play, so start a new piece at the top
+                self.fallingPiece = self.nextPiece
+                self.nextPiece = self.getNewPiece()
+                self.lastFallTime = time.time()  # reset lastFallTime
 
-        elif (action == K_RIGHT) and self.isValidPosition(self.board, self.fallingPiece,
-                                                          adjX=1):
-            self.fallingPiece['x'] += 1
-            self.movingRight = True
-            self.movingLeft = False
-            self.lastMoveSidewaysTime = time.time()
+                if not self.isValidPosition(self.board, self.fallingPiece):
+                    self.game_over = True  # can't fit a new piece on the board, so game over
+                    return 'terminal', reward
 
-        # rotating the piece (if there is room to rotate)
-        elif action == K_UP:
-            self.fallingPiece['rotation'] = (self.fallingPiece['rotation'] + 1) % len(
-                PIECES[self.fallingPiece['shape']])
-            if not self.isValidPosition(self.board, self.fallingPiece):
-                self.fallingPiece['rotation'] = (self.fallingPiece['rotation'] - 1) % len(
+            self.checkForQuit()
+            if (action == K_LEFT) and self.isValidPosition(self.board, self.fallingPiece,
+                                                           adjX=-1):
+                self.fallingPiece['x'] -= 1
+                self.movingLeft = True
+                self.movingRight = False
+                self.lastMoveSidewaysTime = time.time()
+
+            elif (action == K_RIGHT) and self.isValidPosition(self.board, self.fallingPiece,
+                                                              adjX=1):
+                self.fallingPiece['x'] += 1
+                self.movingRight = True
+                self.movingLeft = False
+                self.lastMoveSidewaysTime = time.time()
+
+            # rotating the piece (if there is room to rotate)
+            elif action == K_UP:
+                self.fallingPiece['rotation'] = (self.fallingPiece['rotation'] + 1) % len(
                     PIECES[self.fallingPiece['shape']])
+                if not self.isValidPosition(self.board, self.fallingPiece):
+                    self.fallingPiece['rotation'] = (self.fallingPiece['rotation'] - 1) % len(
+                        PIECES[self.fallingPiece['shape']])
 
-        # making the piece fall faster with the down key
-        elif action == K_DOWN:
-            self.movingDown = True
-            if self.isValidPosition(self.board, self.fallingPiece, adjY=1):
+            # making the piece fall faster with the down key
+            elif action == K_DOWN:
+                self.movingDown = True
+                if self.isValidPosition(self.board, self.fallingPiece, adjY=1):
+                    self.fallingPiece['y'] += 1
+                self.lastMoveDownTime = time.time()
+
+            # move the current piece all the way down
+            elif action == K_SPACE:
+                self.movingDown = False
+                self.movingLeft = False
+                self.movingRight = False
+                for i in range(1, BOARDHEIGHT):
+                    if not self.isValidPosition(self.board, self.fallingPiece, adjY=i):
+                        break
+                    self.fallingPiece['y'] += i - 1
+
+                    # let the piece fall if it is time to fall
+                    # if time.time() - self.lastFallTime > self.fallFreq:
+                    # see if the piece has landed
+            if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
+                # falling piece has landed, set it on the board
+                self.addToBoard()
+                self.score += self.removeCompleteLines(self.board)
+                # getting reward
+                reward += self.removeCompleteLines(self.board)
+                self.level, self.fallFreq = self.calculateLevelAndFallFreq(self.score)
+                self.fallingPiece = None
+            else:
+                # piece did not land, just move the piece down
                 self.fallingPiece['y'] += 1
-            self.lastMoveDownTime = time.time()
+                self.lastFallTime = time.time()
 
-        # move the current piece all the way down
-        elif action == K_SPACE:
-            self.movingDown = False
-            self.movingLeft = False
-            self.movingRight = False
-            for i in range(1, BOARDHEIGHT):
-                if not self.isValidPosition(self.board, self.fallingPiece, adjY=i):
-                    break
-                self.fallingPiece['y'] += i - 1
+            # drawing everything on the screen
+            self.DISPLAYSURF.fill(BGCOLOR)
+            self.drawBoard(self.board)
+            # drawStatus(score, level)
+            # drawNextPiece(nextPiece)
+            if self.fallingPiece != None:
+                self.drawPiece(self.fallingPiece)
 
-                # let the piece fall if it is time to fall
-                # if time.time() - self.lastFallTime > self.fallFreq:
-                # see if the piece has landed
-        if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
-            # falling piece has landed, set it on the board
-            self.addToBoard()
-            self.score += self.removeCompleteLines(self.board)
-            # getting reward
-            reward += self.removeCompleteLines(self.board)
-            self.level, self.fallFreq = self.calculateLevelAndFallFreq(self.score)
-            self.fallingPiece = None
-        else:
-            # piece did not land, just move the piece down
-            self.fallingPiece['y'] += 1
-            self.lastFallTime = time.time()
+            # update the display
+            pygame.display.update()
+            # adjust FPS
+            self.FPSCLOCK.tick(FPS)
 
-        # drawing everything on the screen
-        self.DISPLAYSURF.fill(BGCOLOR)
-        self.drawBoard(self.board)
-        # drawStatus(score, level)
-        # drawNextPiece(nextPiece)
-        if self.fallingPiece != None:
-            self.drawPiece(self.fallingPiece)
+            # image_data = pygame.surfarray.array2d(pygame.display.get_surface())
 
-        # update the display
-        pygame.display.update()
-        # adjust FPS
-        self.FPSCLOCK.tick(FPS)
+            binaryboard = self.fn(self.board)
 
-        # image_data = pygame.surfarray.array2d(pygame.display.get_surface())
+            # binaryboard = [fn(j) for j in [i for i in self.board]]
 
-        binaryboard = self.fn(self.board)
-
-        # binaryboard = [fn(j) for j in [i for i in self.board]]
-
-        # return image_data, reward
+            # return image_data, reward
         return (binaryboard, self.fallingPiece), reward
 
     def makeTextObjs(self, text, font, color):
@@ -266,6 +269,31 @@ class TetrisEnv:
                 if board[x + piece['x'] + adjX][y + piece['y'] + adjY] != BLANK:
                     return False
         return True
+
+    def get_legal_actions(self):
+        possibleSpin = [[], [K_UP], [K_UP, K_UP], [K_UP, K_UP, K_UP]]
+        possibleXAdj = []
+
+        def to_k_left_right(num):
+            if num >= 0:
+                temp1 = [K_RIGHT]*num
+                return temp1.append(K_SPACE)
+            else:
+                temp2 = [K_LEFT]*num
+                return temp2.append(K_SPACE)
+
+        for xAdj in range(-BOARDWIDTH, BOARDWIDTH):
+            if self.isValidPosition(self.board, self.fallingPiece, xAdj, 0):
+                possibleXAdj.append(xAdj)
+        movesAndSpace = map(to_k_left_right, possibleXAdj)
+
+        result = []
+
+        for spin in possibleSpin:
+            for move in movesAndSpace:
+                result.append(spin.extend(move))
+
+        return result
 
     def isCompleteLine(self, board, y):
         # Return True if the line filled with boxes with no gaps.
