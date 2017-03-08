@@ -34,7 +34,7 @@ class TetrisAgent(object):
         if reward == None:
             self.agentStartEpisode(state)
         if state != 'terminal':
-            next_action = self.agentChoose()
+            next_action = self.agentChoose(state)
 
             self.agentLearn(reward, state, next_action)
 
@@ -49,7 +49,7 @@ class RandomAgent(TetrisAgent):
     def __init__(self, env):
         super(RandomAgent, self).__init__(env)
 
-    def agentChoose(self):
+    def agentChoose(self, state):
         # randomize an action to be played
         return random.choice(self.env.get_legal_actions())
 
@@ -61,7 +61,7 @@ class RandomAgent(TetrisAgent):
 
 
 class ValueIterationAgent(TetrisAgent):
-    def __init__(self, config):
+    def __init__(self, env, config):
         """
         :param
         config:
@@ -69,48 +69,51 @@ class ValueIterationAgent(TetrisAgent):
         epsilon  - exploration rate
         gamma    - discount factor
         """
-        super(ValueIterationAgent, self).__init__()
+        super(ValueIterationAgent, self).__init__(env)
         self.epsilon = config['epsilon']
         self.gamma = config['gamma']
         self.alpha = config['alpha']
+        self.featureExtractor = config['featureExtractor']
+        self.weights = util.Counter()
 
-    def getLegalActions(self, state):
-        return []
-
-    @abstractmethod
     def getQValue(self, state, action):
-        pass
+        qValue = 0.0
+        next_state = self.getNextState(state, action)
+        features = self.featureExtractor.extract(state, next_state)
+        for key in features.keys():
+            self.weights[key] += 1
+            qValue += (self.weights[key] * features[key])
+            print features[key]
+            print qValue
+        return qValue
 
     def getPolicy(self, state, legalActions):
         possibleStateQValues = util.Counter()
 
         for action in legalActions:
-            possibleStateQValues[action] = self.getQValue(state, action)
+            aa = action.mkString("")
+            possibleStateQValues[aa] = self.getQValue(state, action)
 
         return possibleStateQValues.argMax()
 
     def agentChoose(self, state):
 
-        legalActions = self.getLegalActions(state)
+        legalActions = self.env.get_legal_actions()
         if (random.random() <= self.epsilon):
             return random.choice(legalActions)
         else:
             return self.getPolicy(state, legalActions)
 
+    def getNextState(self, state, action):
+        return state
+
+    def agentStartEpisode(self, state):
+        super(ValueIterationAgent, self).agentStartEpisode(state)
+
 
 class SarsaApproxAgent(ValueIterationAgent):
-    def __init__(self, config):
-        super(SarsaApproxAgent, self).__init__(config)
-        self.featureExtractor = getattr(featureExtractor, config['featureExtractor'])
-        self.weights = util.Counter()
-
-    def getQValue(self, state, action):
-        qValue = 0.0
-        next_state = getNextState(state, action)
-        features = self.featureExtractor.extract(state, next_state)
-        for key in features.keys():
-            qValue += (self.weights[key] * features[key])
-        return qValue
+    def __init__(self, env, config):
+        super(SarsaApproxAgent, self).__init__(env, config)
 
     def agentLearn(self, reward, state, next_action):
         features = self.featureExtractor.extract(self.lastState, state)
@@ -120,14 +123,15 @@ class SarsaApproxAgent(ValueIterationAgent):
             self.weights[key] += self.alpha * err * features[key]
 
 
-class QLearningApproxAgent(SarsaApproxAgent):
-    def __init__(self, config):
-        super(SarsaApproxAgent, self).__init__(config)
+class QLearningApproxAgent(ValueIterationAgent):
+    def __init__(self, env, config):
+        super(QLearningApproxAgent, self).__init__(env, config)
 
     def getValue(self, state):
         possibleStateQValues = util.Counter()
-        for action in self.getLegalActions(state):
-            possibleStateQValues[action] = self.getQValue(state, action)
+        for action in self.env.get_legal_actions():
+            aa = action.mkString("")
+            possibleStateQValues[aa] = self.getQValue(state, action)
 
         return possibleStateQValues[possibleStateQValues.argMax()]
 

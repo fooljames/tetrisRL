@@ -18,8 +18,9 @@ class SimpleFeatureExtractor(FeatureExtractor):
     def __init__(self):
         super(SimpleFeatureExtractor, self).__init__()
 
-    def extract(self, previous, current):
-        shape = current.shape
+    def extract(self, previous, present):
+        current = np.matrix(present[0])
+        shape = current[0].shape
         col_height = np.zeros(shape[1], dtype=np.int16)
         height_diff = np.zeros(shape[1] - 1, dtype=np.int16)
         holes = 0
@@ -34,9 +35,9 @@ class SimpleFeatureExtractor(FeatureExtractor):
 
         max_height = np.amax(col_height)
 
-        features = {'col_height': col_height,
+        features = {'col_height': np.sum(col_height),
                     'max_height': max_height,
-                    'height_diff': height_diff,
+                    'height_diff': np.sum(height_diff),
                     'holes': holes}
 
 
