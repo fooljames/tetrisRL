@@ -7,12 +7,24 @@ import numpy
 
 # numpy.set_printoptions(threshold='nan')
 
+#TODO
+"""
+-2. no reward.. weight should not updated
+-1. check inf issue with weights
+ 0. Make sure get next state really works..
+ 1. All features to be correct..
+ 2. Different shape get their own feature set (One hot encoding)
+ 3. Save weights every epoch
+ 4. Analysing features weight
+ 5. Normalize features (0 - 1)
+"""
+
 
 def main():
     envconf = {
         'BOARDWIDTH': 10,
         'BOARDHEIGHT': 20,
-        'FPS': 10
+        'FPS': 100
     }
 
     agentConf = {
@@ -26,7 +38,7 @@ def main():
     agent = QLearningApproxAgent(env, agentConf)
     rli = RLinterface(agent.agentFn, env.envFn)
     # run two episodes of tetris and print state, action, reward for every step
-    episode = rli.episodes(5)
+    episode = rli.episodes(30)
     print "episode"
     print episode
 

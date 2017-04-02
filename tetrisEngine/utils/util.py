@@ -9,6 +9,7 @@
 import sys
 import inspect
 import heapq, random
+import numpy as np
 
 """
  Data structures useful for implementing SearchAgents
@@ -178,8 +179,10 @@ class Counter(dict):
         """
         if len(self.keys()) == 0: return None
         all = self.items()
-        values = [x[1] for x in all]
-        maxIndex = values.index(max(values))
+        values = np.array([x[1] for x in all])
+
+        maxIndex = np.random.choice(np.flatnonzero(values == values.max()))
+
         return all[maxIndex][0]
 
     def sortedKeys(self):

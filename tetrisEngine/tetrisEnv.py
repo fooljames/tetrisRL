@@ -81,7 +81,7 @@ class TetrisEnv:
 
 
     # update state according to a given action and return 'terminal' if it can't fit a new piece on the board
-    def update_state(self, actions ):
+    def update_state(self, actions):
 
         # for action in actions:
         #
@@ -169,7 +169,6 @@ class TetrisEnv:
         (updated, reward) = self.getStateAfterActions(actions)
 
         if updated != 'terminal':
-            self = updated
             self.checkForQuit()
             binaryboard = self.fn(self.board)
 
@@ -180,8 +179,11 @@ class TetrisEnv:
         else:
             return updated, reward
 
-    def getStateAfterActions(self, actions, update_board = True):
-        temp = self
+    def getStateAfterActions(self, actions, update_board=True):
+        if not update_board:
+            temp = copy.deepcopy(self)
+        else:
+            temp = self
 
         for action in actions:
 
@@ -268,7 +270,6 @@ class TetrisEnv:
                 temp.FPSCLOCK.tick(FPS)
 
         return temp, reward
-
 
     def makeTextObjs(self, text, font, color):
         surf = font.render(text, True, color)
@@ -372,11 +373,11 @@ class TetrisEnv:
 
         def to_k_left_right(num):
             if num >= 0:
-                temp = [K_RIGHT]*num
+                temp = [K_RIGHT] * num
                 temp.append(K_SPACE)
                 return temp
             else:
-                temp = [K_LEFT]*-num
+                temp = [K_LEFT] * -num
                 temp.append(K_SPACE)
                 return temp
 

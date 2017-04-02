@@ -89,7 +89,8 @@ class ValueIterationAgent(TetrisAgent):
                 self.weights[key] += 1
                 qValue += (self.weights[key] * features[key])
         else:
-            qValue = -100000000.0
+            #TODO what should be this value ?
+            qValue = -100.0
 
         return qValue
 
@@ -123,24 +124,24 @@ class ValueIterationAgent(TetrisAgent):
             return self.getPolicy(state, legalActions)
 
     def getNextState(self, state, action):
-        # return state
-        # print "---------------------"
-        # print "for action"
-        # print action
-
-        # next = self.env.getStateAfterActions(action, False)
-        #
-        # if next[0] == 'terminal':
-        #     next_state = 'terminal'
-        #     falling_piece = None
-        # else:
-        #     next_state = self.env.fn(next[0].board)
-        #     falling_piece = next[0].fallingPiece
-
-        # print "next state"
-        # print state
-        # return next_state, falling_piece
         return state
+        print "---------------------"
+        print "for action"
+        print action
+
+        next = self.env.getStateAfterActions(action, False)
+
+        if next[0] == 'terminal':
+            next_state = 'terminal'
+            falling_piece = None
+        else:
+            next_state = self.env.fn(next[0].board)
+            falling_piece = next[0].fallingPiece
+
+        print "next state"
+        print state
+        return next_state, falling_piece
+        # return state
 
     def agentStartEpisode(self, state):
         super(ValueIterationAgent, self).agentStartEpisode(state)
@@ -193,8 +194,8 @@ class QLearningApproxAgent(ValueIterationAgent):
         print "last action"
         print self.lastAction
         if self.lastState == None:
-            err = reward + self.gamma * self.getValue(state)
-        else :
+            err = 0.0
+        else:
             err = reward + self.gamma * self.getValue(state) - self.getQValue(self.lastState, self.lastAction)
 
         print "err"
