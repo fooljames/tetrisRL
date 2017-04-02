@@ -15,7 +15,6 @@ import numpy
  1. All features to be correct..
  2. Different shape get their own feature set (One hot encoding)
  3. Save weights every epoch
- 4. Analysing features weight
  5. Normalize features (0 - 1)
 """
 
