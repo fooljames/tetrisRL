@@ -40,6 +40,8 @@ class TetrisAgent(object):
 
             self.lastState, self.lastAction = state, next_action
 
+            print "##################complete##################"
+
             return next_action
         else:
             return None
@@ -79,32 +81,65 @@ class ValueIterationAgent(TetrisAgent):
     def getQValue(self, state, action):
         qValue = 0.0
         next_state = self.getNextState(state, action)
-        features = self.featureExtractor.extract(state, next_state)
-        for key in features.keys():
-            self.weights[key] += 1
-            qValue += (self.weights[key] * features[key])
-            print features[key]
-            print qValue
+        # print "next state"
+        # print next_state
+        if next_state[0] != 'terminal':
+            features = self.featureExtractor.extract(state, next_state)
+            for key in features.keys():
+                self.weights[key] += 1
+                qValue += (self.weights[key] * features[key])
+        else:
+            qValue = -100000000.0
+
         return qValue
 
     def getPolicy(self, state, legalActions):
+
         possibleStateQValues = util.Counter()
 
-        for action in legalActions:
-            aa = action.mkString("")
-            possibleStateQValues[aa] = self.getQValue(state, action)
+        print "getting policy"
 
-        return possibleStateQValues.argMax()
+        for action in legalActions:
+            possibleStateQValues[legalActions.index(action)] = self.getQValue(state, action)
+
+        index = possibleStateQValues.argMax()
+        next_action = legalActions[index]
+
+        print "**************next action************"
+        print next_action
+
+        return next_action
 
     def agentChoose(self, state):
 
         legalActions = self.env.get_legal_actions()
+        print "legal actions"
+        print legalActions
+
         if (random.random() <= self.epsilon):
+            print "return random"
             return random.choice(legalActions)
         else:
             return self.getPolicy(state, legalActions)
 
     def getNextState(self, state, action):
+        # return state
+        # print "---------------------"
+        # print "for action"
+        # print action
+
+        # next = self.env.getStateAfterActions(action, False)
+        #
+        # if next[0] == 'terminal':
+        #     next_state = 'terminal'
+        #     falling_piece = None
+        # else:
+        #     next_state = self.env.fn(next[0].board)
+        #     falling_piece = next[0].fallingPiece
+
+        # print "next state"
+        # print state
+        # return next_state, falling_piece
         return state
 
     def agentStartEpisode(self, state):
@@ -128,16 +163,42 @@ class QLearningApproxAgent(ValueIterationAgent):
         super(QLearningApproxAgent, self).__init__(env, config)
 
     def getValue(self, state):
+        print "getting value for the current action"
         possibleStateQValues = util.Counter()
-        for action in self.env.get_legal_actions():
-            aa = action.mkString("")
-            possibleStateQValues[aa] = self.getQValue(state, action)
 
-        return possibleStateQValues[possibleStateQValues.argMax()]
+        legalActions = self.env.get_legal_actions()
+        for action in legalActions:
+            possibleStateQValues[legalActions.index(action)] = self.getQValue(state, action)
+
+        selected = possibleStateQValues[possibleStateQValues.argMax()]
+
+        print "possibleStateQValues"
+        print possibleStateQValues
+        print "selected"
+        print selected
+
+        return selected
 
     def agentLearn(self, reward, state, next_action):
         features = self.featureExtractor.extract(self.lastState, state)
-        err = reward + self.gamma * self.getValue(state) - self.getQValue(self.lastState, self.lastAction)
+
+        print "getting the features"
+        print features
+
+        if reward == None:
+            reward = 0
+
+        print "last state is"
+        print self.lastState
+        print "last action"
+        print self.lastAction
+        if self.lastState == None:
+            err = reward + self.gamma * self.getValue(state)
+        else :
+            err = reward + self.gamma * self.getValue(state) - self.getQValue(self.lastState, self.lastAction)
+
+        print "err"
+        print err
 
         for key in features:
             self.weights[key] += self.alpha * err * features[key]

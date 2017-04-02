@@ -12,7 +12,7 @@ def main():
     envconf = {
         'BOARDWIDTH': 10,
         'BOARDHEIGHT': 20,
-        'FPS': 30
+        'FPS': 10
     }
 
     agentConf = {
@@ -27,6 +27,7 @@ def main():
     rli = RLinterface(agent.agentFn, env.envFn)
     # run two episodes of tetris and print state, action, reward for every step
     episode = rli.episodes(5)
+    print "episode"
     print episode
 
 

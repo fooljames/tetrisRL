@@ -81,101 +81,194 @@ class TetrisEnv:
 
 
     # update state according to a given action and return 'terminal' if it can't fit a new piece on the board
-    def update_state(self, actions):
+    def update_state(self, actions ):
 
-        for action in actions:
+        # for action in actions:
+        #
+        #     reward = 0
+        #     if (action == K_LEFT) and self.isValidPosition(self.board, self.fallingPiece,
+        #                                                    adjX=-1):
+        #         self.fallingPiece['x'] -= 1
+        #         self.movingLeft = True
+        #         self.movingRight = False
+        #         self.lastMoveSidewaysTime = time.time()
+        #
+        #     elif (action == K_RIGHT) and self.isValidPosition(self.board, self.fallingPiece,
+        #                                                       adjX=1):
+        #         self.fallingPiece['x'] += 1
+        #         self.movingRight = True
+        #         self.movingLeft = False
+        #         self.lastMoveSidewaysTime = time.time()
+        #
+        #     # rotating the piece (if there is room to rotate)
+        #     elif action == K_UP:
+        #         self.fallingPiece['rotation'] = (self.fallingPiece['rotation'] + 1) % len(
+        #             PIECES[self.fallingPiece['shape']])
+        #         if not self.isValidPosition(self.board, self.fallingPiece):
+        #             self.fallingPiece['rotation'] = (self.fallingPiece['rotation'] - 1) % len(
+        #                 PIECES[self.fallingPiece['shape']])
+        #
+        #     # making the piece fall faster with the down key
+        #     elif action == K_DOWN:
+        #         self.movingDown = True
+        #         if self.isValidPosition(self.board, self.fallingPiece, adjY=1):
+        #             self.fallingPiece['y'] += 1
+        #         self.lastMoveDownTime = time.time()
+        #
+        #     # move the current piece all the way down
+        #     elif action == K_SPACE:
+        #         self.movingDown = False
+        #         self.movingLeft = False
+        #         self.movingRight = False
+        #         for i in range(1, BOARDHEIGHT):
+        #             if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
+        #                 break
+        #             self.fallingPiece['y'] += 1
+        #
+        #             # let the piece fall if it is time to fall
+        #             # if time.time() - self.lastFallTime > self.fallFreq:
+        #             # see if the piece has landed
+        #     if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
+        #         # falling piece has landed, set it on the board
+        #         self.addToBoard()
+        #         self.score += self.removeCompleteLines(self.board)
+        #         # getting reward
+        #         reward += self.removeCompleteLines(self.board)
+        #         self.level, self.fallFreq = self.calculateLevelAndFallFreq(self.score)
+        #         self.fallingPiece = None
+        #     else:
+        #         # piece did not land, just move the piece down
+        #         self.fallingPiece['y'] += 1
+        #         self.lastFallTime = time.time()
+        #
+        #     if self.fallingPiece == None:
+        #         # No falling piece in play, so start a new piece at the top
+        #         self.fallingPiece = self.nextPiece
+        #         self.nextPiece = self.getNewPiece()
+        #         self.lastFallTime = time.time()  # reset lastFallTime
+        #
+        #         if not self.isValidPosition(self.board, self.fallingPiece):
+        #             self.game_over = True  # can't fit a new piece on the board, so game over
+        #             return 'terminal', reward
+        #
+        #     # drawing everything on the screen
+        #     self.DISPLAYSURF.fill(BGCOLOR)
+        #     self.drawBoard(self.board)
+        #     # drawStatus(score, level)
+        #     # drawNextPiece(nextPiece)
+        #     if self.fallingPiece != None:
+        #         self.drawPiece(self.fallingPiece)
+        #
+        #     # update the display
+        #     pygame.display.update()
+        #     # adjust FPS
+        #     self.FPSCLOCK.tick(FPS)
+        #
+        #     # image_data = pygame.surfarray.array2d(pygame.display.get_surface())
 
-            reward = 0
-            if (action == K_LEFT) and self.isValidPosition(self.board, self.fallingPiece,
-                                                           adjX=-1):
-                self.fallingPiece['x'] -= 1
-                self.movingLeft = True
-                self.movingRight = False
-                self.lastMoveSidewaysTime = time.time()
+        (updated, reward) = self.getStateAfterActions(actions)
 
-            elif (action == K_RIGHT) and self.isValidPosition(self.board, self.fallingPiece,
-                                                              adjX=1):
-                self.fallingPiece['x'] += 1
-                self.movingRight = True
-                self.movingLeft = False
-                self.lastMoveSidewaysTime = time.time()
-
-            # rotating the piece (if there is room to rotate)
-            elif action == K_UP:
-                self.fallingPiece['rotation'] = (self.fallingPiece['rotation'] + 1) % len(
-                    PIECES[self.fallingPiece['shape']])
-                if not self.isValidPosition(self.board, self.fallingPiece):
-                    self.fallingPiece['rotation'] = (self.fallingPiece['rotation'] - 1) % len(
-                        PIECES[self.fallingPiece['shape']])
-
-            # making the piece fall faster with the down key
-            elif action == K_DOWN:
-                self.movingDown = True
-                if self.isValidPosition(self.board, self.fallingPiece, adjY=1):
-                    self.fallingPiece['y'] += 1
-                self.lastMoveDownTime = time.time()
-
-            # move the current piece all the way down
-            elif action == K_SPACE:
-                self.movingDown = False
-                self.movingLeft = False
-                self.movingRight = False
-                for i in range(1, BOARDHEIGHT):
-                    if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
-                        break
-                    self.fallingPiece['y'] += 1
-
-                    # let the piece fall if it is time to fall
-                    # if time.time() - self.lastFallTime > self.fallFreq:
-                    # see if the piece has landed
-            if not self.isValidPosition(self.board, self.fallingPiece, adjY=1):
-                # falling piece has landed, set it on the board
-                self.addToBoard()
-                self.score += self.removeCompleteLines(self.board)
-                # getting reward
-                reward += self.removeCompleteLines(self.board)
-                self.level, self.fallFreq = self.calculateLevelAndFallFreq(self.score)
-                self.fallingPiece = None
-            else:
-                # piece did not land, just move the piece down
-                self.fallingPiece['y'] += 1
-                self.lastFallTime = time.time()
-
-            if self.fallingPiece == None:
-                # No falling piece in play, so start a new piece at the top
-                self.fallingPiece = self.nextPiece
-                self.nextPiece = self.getNewPiece()
-                self.lastFallTime = time.time()  # reset lastFallTime
-
-                if not self.isValidPosition(self.board, self.fallingPiece):
-                    self.game_over = True  # can't fit a new piece on the board, so game over
-                    return 'terminal', reward
-
-            # drawing everything on the screen
-            self.DISPLAYSURF.fill(BGCOLOR)
-            self.drawBoard(self.board)
-            # drawStatus(score, level)
-            # drawNextPiece(nextPiece)
-            if self.fallingPiece != None:
-                self.drawPiece(self.fallingPiece)
-
-            # update the display
-            pygame.display.update()
-            # adjust FPS
-            self.FPSCLOCK.tick(FPS)
-
-            # image_data = pygame.surfarray.array2d(pygame.display.get_surface())
-
-
-
-
-        self.checkForQuit()
-        binaryboard = self.fn(self.board)
+        if updated != 'terminal':
+            self = updated
+            self.checkForQuit()
+            binaryboard = self.fn(self.board)
 
             # binaryboard = [fn(j) for j in [i for i in self.board]]
 
             # return image_data, reward
-        return (binaryboard, self.fallingPiece), reward
+            return (binaryboard, self.fallingPiece), reward
+        else:
+            return updated, reward
+
+    def getStateAfterActions(self, actions, update_board = True):
+        temp = self
+
+        for action in actions:
+
+            reward = 0
+            if (action == K_LEFT) and temp.isValidPosition(temp.board, temp.fallingPiece,
+                                                           adjX=-1):
+                temp.fallingPiece['x'] -= 1
+                temp.movingLeft = True
+                temp.movingRight = False
+                temp.lastMoveSidewaysTime = time.time()
+
+            elif (action == K_RIGHT) and temp.isValidPosition(temp.board, temp.fallingPiece,
+                                                              adjX=1):
+                temp.fallingPiece['x'] += 1
+                temp.movingRight = True
+                temp.movingLeft = False
+                temp.lastMoveSidewaysTime = time.time()
+
+            # rotating the piece (if there is room to rotate)
+            elif action == K_UP:
+                temp.fallingPiece['rotation'] = (temp.fallingPiece['rotation'] + 1) % len(
+                    PIECES[temp.fallingPiece['shape']])
+                if not temp.isValidPosition(temp.board, temp.fallingPiece):
+                    temp.fallingPiece['rotation'] = (temp.fallingPiece['rotation'] - 1) % len(
+                        PIECES[temp.fallingPiece['shape']])
+
+            # making the piece fall faster with the down key
+            elif action == K_DOWN:
+                temp.movingDown = True
+                if temp.isValidPosition(temp.board, temp.fallingPiece, adjY=1):
+                    temp.fallingPiece['y'] += 1
+                temp.lastMoveDownTime = time.time()
+
+            # move the current piece all the way down
+            elif action == K_SPACE:
+                temp.movingDown = False
+                temp.movingLeft = False
+                temp.movingRight = False
+                for i in range(1, BOARDHEIGHT):
+                    if not temp.isValidPosition(temp.board, temp.fallingPiece, adjY=1):
+                        break
+                    temp.fallingPiece['y'] += 1
+
+                    # let the piece fall if it is time to fall
+                    # if time.time() - self.lastFallTime > self.fallFreq:
+                    # see if the piece has landed
+            if not temp.isValidPosition(temp.board, temp.fallingPiece, adjY=1):
+                # falling piece has landed, set it on the board
+                temp.addToBoard()
+                temp.score += temp.removeCompleteLines(self.board)
+                # getting reward
+                reward += temp.removeCompleteLines(temp.board)
+                temp.level, temp.fallFreq = temp.calculateLevelAndFallFreq(temp.score)
+                temp.fallingPiece = None
+            else:
+                # piece did not land, just move the piece down
+                temp.fallingPiece['y'] += 1
+                temp.lastFallTime = time.time()
+
+            if temp.fallingPiece == None:
+                # No falling piece in play, so start a new piece at the top
+                temp.fallingPiece = temp.nextPiece
+                temp.nextPiece = temp.getNewPiece()
+                temp.lastFallTime = time.time()  # reset lastFallTime
+
+                if not temp.isValidPosition(temp.board, temp.fallingPiece):
+                    temp.game_over = True  # can't fit a new piece on the board, so game over
+                    return 'terminal', reward
+
+            if update_board:
+                print "updating board"
+
+                # drawing everything on the screen
+                self.DISPLAYSURF.fill(BGCOLOR)
+                self.drawBoard(self.board)
+                # drawStatus(score, level)
+                # drawNextPiece(nextPiece)
+                if temp.fallingPiece != None:
+                    temp.drawPiece(self.fallingPiece)
+
+                # update the display
+                pygame.display.update()
+                # adjust FPS
+                temp.FPSCLOCK.tick(FPS)
+
+        return temp, reward
+
 
     def makeTextObjs(self, text, font, color):
         surf = font.render(text, True, color)

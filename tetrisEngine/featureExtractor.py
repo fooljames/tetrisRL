@@ -20,6 +20,7 @@ class SimpleFeatureExtractor(FeatureExtractor):
 
     def extract(self, previous, present):
         current = np.matrix(present[0])
+        # print current
         shape = current[0].shape
         col_height = np.zeros(shape[1], dtype=np.int16)
         height_diff = np.zeros(shape[1] - 1, dtype=np.int16)
