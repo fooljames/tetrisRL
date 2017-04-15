@@ -103,6 +103,8 @@ class ValueIterationAgent(TetrisAgent):
         for action in legalActions:
             possibleStateQValues[legalActions.index(action)] = self.getQValue(state, action)
 
+        print possibleStateQValues
+
         index = possibleStateQValues.argMax()
         next_action = legalActions[index]
 
@@ -186,20 +188,27 @@ class QLearningApproxAgent(ValueIterationAgent):
         print "getting the features"
         print features
 
-        if reward == None:
+        if reward == None or reward == 0:
             reward = 0
-
-        print "last state is"
-        print self.lastState
-        print "last action"
-        print self.lastAction
-        if self.lastState == None:
-            err = 0.0
         else:
-            err = reward + self.gamma * self.getValue(state) - self.getQValue(self.lastState, self.lastAction)
+            print "reward"
+            print reward
+            print "last state is"
+            print self.lastState
+            print "last action"
+            print self.lastAction
+            if self.lastState == None:
+                err = 0.0
+            else:
+                err = reward + self.gamma * self.getValue(state) - self.getQValue(self.lastState, self.lastAction)
+                print "err"
+                print err
+            for key in features:
+                self.weights[key] += self.alpha * err * features[key]
 
-        print "err"
-        print err
 
-        for key in features:
-            self.weights[key] += self.alpha * err * features[key]
+
+
+
+
+
