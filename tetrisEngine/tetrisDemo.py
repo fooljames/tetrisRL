@@ -21,9 +21,9 @@ import numpy
 
 def main():
     envconf = {
-        'BOARDWIDTH': 10,
-        'BOARDHEIGHT': 20,
-        'FPS': 200
+        'BOARDWIDTH': 6,
+        'BOARDHEIGHT': 12,
+        'FPS': 10
     }
 
     agentConf = {
@@ -37,7 +37,7 @@ def main():
     agent = QLearningApproxAgent(env, agentConf)
     rli = RLinterface(agent.agentFn, env.envFn)
     # run two episodes of tetris and print state, action, reward for every step
-    episode = rli.episodes(50)
+    episode = rli.episodes(1)
     print "episode"
     print episode
 
